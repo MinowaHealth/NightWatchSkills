@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<!-- TITLE: "Description — YYYY-MM-DD · h:MM–h:MM PM" -->
+<title>{{TITLE}}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#1a1d21; --muted:#5b636e; --line:#e3e6ea; --bg:#ffffff;
+    --hr:#d1495b; --stress:#e0a010; --sys:#2668a8; --dia:#3f9aa8;
+    --band:#7b88bf; --event:#8a8f98; --dose:#2e8b57;
+  }
+  :root{color-scheme:light only;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#f4f5f7 !important;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .page{max-width:920px;margin:28px auto;background:var(--bg);
+    border:1px solid var(--line);border-radius:14px;padding:34px 40px 30px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  header{border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:20px;}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:-.01em;}
+  .sub{color:var(--muted);font-size:14px;}
+  .sub b{color:var(--ink);font-weight:600;}
+  .chartwrap{position:relative;height:480px;margin:10px 0 6px;}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;color:var(--muted);
+    margin:2px 2px 24px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend .brk{flex-basis:100%;height:0;margin:0;}
+  .swatch{width:14px;height:3px;border-radius:2px;display:inline-block;}
+  .swatch.dot{width:9px;height:9px;border-radius:50%;}
+  .swatch.band{width:14px;height:11px;border-radius:3px;}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+    margin:26px 0 10px;font-weight:700;}
+  p{font-size:15px;line-height:1.62;margin:0 0 13px;}
+  .lead{font-size:15.5px;}
+  strong{font-weight:650;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0 4px;}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;}
+  td.n{font-variant-numeric:tabular-nums;}
+  .flag{color:#b4531f;font-size:12px;}
+  .obs{font-size:13.5px;line-height:1.6;}
+  .obs .t{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600;margin-right:8px;}
+  .caveats{background:#f7f8fa;border:1px solid var(--line);border-radius:10px;
+    padding:14px 18px;margin-top:24px;}
+  .caveats h2{margin-top:0;}
+  .caveats ul{margin:0;padding-left:18px;}
+  .caveats li{font-size:13.5px;line-height:1.6;color:var(--muted);margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>{{HEADING}}</h1>
+    <div class="sub"><b>{{DATE_LONG}}</b> · analyzed window {{WINDOW_LABEL}} (chart padded ±15 min)</div>
+  </header>
+
+  <div class="chartwrap"><canvas id="chart"></canvas></div>
+  <div class="legend">
+    <span><span class="swatch" style="background:var(--hr)"></span>Heart rate</span>
+    <span><span class="swatch" style="background:#1f6fb2"></span>Stress</span>
+    <span><span class="swatch dot" style="background:#e8871e"></span>BP · arm/desk</span>
+    <span><span class="swatch dot" style="background:#9b4dca"></span>BP · wrist/bed</span>
+    <span style="color:#8b8f96">dot at systolic, labeled sys/dia</span>
+    <span><span class="swatch dot" style="background:#14171c;box-shadow:0 0 0 1px #fff"></span>Observation</span>
+    <span><span class="swatch dot" style="background:#0c7a41;box-shadow:0 0 0 1px #fff"></span>Dose</span>
+    <span style="color:#8b8f96">icons run in a row above the hypnogram — hover for the note and a rule through both traces</span>
+    <div class="brk"></div>
+    <span><span class="swatch band" style="background:#2c3e70"></span>Deep</span>
+    <span><span class="swatch band" style="background:#9aa4d4"></span>Light</span>
+    <span><span class="swatch band" style="background:#59b0a8"></span>REM</span>
+    <span><span class="swatch band" style="background:#e0b774"></span>Awake</span>
+  </div>
+
+  <!-- NARRATIVE: keep small; apply HealthMonitoringNorms.md; user's own first-person voice; no hedging -->
+  <p class="lead">{{LEAD}}</p>
+  {{NARRATIVE_PARAGRAPHS}}
+
+  <h2>Readings</h2>
+  <table>
+    <thead><tr><th>Time</th><th>Metric</th><th>Value</th><th>Source</th><th></th></tr></thead>
+    <tbody>
+      {{TABLE_ROWS}}
+    </tbody>
+  </table>
+
+  <h2>Observations (logged, verbatim)</h2>
+  <div class="obs">
+    {{OBSERVATIONS}}
+  </div>
+
+  <div class="caveats">
+    <h2>Caveats</h2>
+    <ul>
+      <li>Blood-pressure meters are uncalibrated: an upper-arm unit (desk) and a wrist cuff (bed). The wrist reads consistently higher by design; within a sleep period it is tracked as a <em>relative</em> series against HR and stress, not as absolute clinical values.</li>
+      {{CAVEAT_ITEMS}}
+    </ul>
+  </div>
+</div>
+
+<script>
+// ---------- DATA (fill per session) ----------
+// HR and stress are on offset clocks — two separate sparse series of {x,y}.
+// x is minutes-since-midnight (local) so the axis is a simple linear time scale.
+const HR     = {{HR_POINTS}};      // [{x:870,y:74}, ...]
+const STRESS = {{STRESS_POINTS}};  // [{x:872,y:31}, ...]
+const ARM_BP   = {{ARM_BP}};    // desk arm cuff:  [{x, sys, dia}, ...] (seated/standing)
+const WRIST_BP = {{WRIST_BP}};  // bed wrist cuff: [{x, sys, dia}, ...] (rest periods only)
+const REST   = {{REST_BAND}};      // {from:min, to:min, label?} — fallback when sleep is unscored
+const STAGES = {{STAGES}};         // scored sleep: [{from,to,stage:"deep|light|rem|awake"}, ...] or []
+const SPANS  = {{SPANS}};          // annotated periods: [{from,to,label,color}, ...] e.g. symptom spell, exertion
+const EVENTS = {{EVENTS}};         // [{x:min, label:"ear drops", type:"obs"|"dose", tier:0}, ...]
+const XMIN   = {{XMIN}};           // padded window start, minutes-since-midnight
+const XMAX   = {{XMAX}};           // padded window end
+
+// Persistent layout rule: left (BPM/stress) axis runs from a fixed base of 0 to peak heart rate + 10.
+const YTOP = Math.max(...HR.map(p=>p.y)) + 10;
+const YBASE = 0;
+
+// ---------- helpers ----------
+function fmt(min){
+  min=((min%1440)+1440)%1440; // wrap for windows that cross midnight
+  let h=Math.floor(min/60), mm=Math.round(min%60);
+  if(mm===60){mm=0;h+=1;}
+  const ap=h>=12?"PM":"AM"; let hh=h%12; if(hh===0)hh=12;
+  return hh+":"+String(mm).padStart(2,"0")+" "+ap;
+}
+
+// Value of a sparse series at an arbitrary minute, by interpolating its two neighbours.
+// Returns null rather than guessing when the neighbours are further apart than maxGap —
+// which is what keeps a stress gap (the user was moving, so Garmin scored nothing) from being
+// silently invented. Never extrapolates past either end of the series.
+function valAt(series, mx, maxGap){
+  if(!series || !series.length) return null;
+  let lo=null, hi=null;
+  for(let i=0;i<series.length;i++){
+    if(series[i].x<=mx) lo=series[i];
+    if(series[i].x>=mx){ hi=series[i]; break; }
+  }
+  if(lo===null || hi===null) return null;
+  if(hi.x-lo.x>maxGap) return null;
+  if(hi.x===lo.x) return lo.y;
+  return lo.y + (hi.y-lo.y)*((mx-lo.x)/(hi.x-lo.x));
+}
+const HR_GAP = 8, STRESS_GAP = 12;
+
+// ---------- event icons live in their own lane along the bottom ----------
+// They used to ride the heart-rate trace, which put them at the mercy of the line's
+// shape: events minutes apart on a 12-hour axis landed on top of each other and became
+// unreadable. They now occupy a dedicated lane just above the hypnogram, at a constant
+// height, so the eye scans one row instead of hunting the trace.
+//
+// The y below is a placeholder — the eventLane plugin overwrites each element's pixel
+// position after layout. Keeping them as real datasets (rather than drawing them in the
+// overlay) is what preserves hover: Chart.js hit-tests the element's x/y, which we set.
+const EVT = EVENTS.map(e=>({x:e.x, y:0, label:e.label, type:e.type}));
+const EVT_OBS  = EVT.filter(e=>e.type!=="dose");
+const EVT_DOSE = EVT.filter(e=>e.type==="dose");
+
+// ---------- eventCrosshair: on hover, drop a rule through the whole plot ----------
+// The lane decoupled the icon from the trace, which cost the reading "what were HR and
+// stress doing at that moment". This gives it back on demand: hovering an event draws a
+// full-height rule at its minute and rings where that rule crosses each series. Nothing
+// is drawn at rest, so the chart stays quiet.
+const eventCrosshair = {
+  id:"eventCrosshair",
+  afterDatasetsDraw(c){
+    const act=c.getActiveElements();
+    if(!act.length) return;
+    const ds=c.data.datasets[act[0].datasetIndex];
+    if(ds.label!=="Observation" && ds.label!=="Dose") return;
+    const raw=ds.data[act[0].index];
+    const {ctx, chartArea:a, scales:{x,y}}=c;
+    const px=x.getPixelForValue(raw.x);
+    const dose=raw.type==="dose";
+    ctx.save();
+    ctx.strokeStyle=dose?"rgba(12,122,65,.6)":"rgba(20,23,28,.5)";
+    ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(px,a.top); ctx.lineTo(px,a.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    const ring=(v,col)=>{
+      if(v===null) return;
+      const py=y.getPixelForValue(v);
+      ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2);
+      ctx.fillStyle="#fff"; ctx.fill();
+      ctx.lineWidth=2.5; ctx.strokeStyle=col; ctx.stroke();
+    };
+    ring(valAt(HR,raw.x,HR_GAP),"#d1495b");
+    ring(valAt(STRESS,raw.x,STRESS_GAP),"#1f6fb2");
+    ctx.restore();
+  }
+};
+
+// ---------- eventLane: pin the event icons into a row above the hypnogram ----------
+// Runs after layout, before draw, and rewrites each icon's pixel y. Icons whose x would
+// overlap a neighbour step up one row — so a sparse window reads as a single clean line
+// and only a genuine cluster stacks. Sorting by x means the stacking is deterministic.
+const eventLane = {
+  id:"eventLane",
+  afterUpdate(c){
+    const a=c.chartArea; if(!a) return;
+    const ribbon  = (STAGES && STAGES.length) ? 15 : 0;   // hypnogram ribbon height
+    const spanRow = (SPANS  && SPANS.length)  ? 20 : 0;   // span brackets + their labels
+    const baseY   = a.bottom - ribbon - spanRow - 13;     // centre of row 0
+    const rowH    = 17;
+    const items=[];
+    c.data.datasets.forEach((ds,di)=>{
+      if(ds.label!=="Observation" && ds.label!=="Dose") return;
+      c.getDatasetMeta(di).data.forEach(el=>items.push({el, r:ds.pointRadius}));
+    });
+    items.sort((p,q)=>p.el.x-q.el.x);
+    const rowRight=[];
+    items.forEach(it=>{
+      const half=it.r+2;
+      let row=0;
+      while(row<rowRight.length && (it.el.x-half) < rowRight[row]) row++;
+      if(row===rowRight.length) rowRight.push(-Infinity);
+      rowRight[row]=it.el.x+half;
+      it.el.y = baseY - row*rowH;
+    });
+  }
+};
+
+// ---------- overlay plugin: rest band (behind) + BP labels & spans (front) ----------
+const overlay = {
+  id:"overlay",
+  beforeDatasetsDraw(c){
+    const {ctx,chartArea:a,scales:{x}}=c;
+    ctx.save();
+    if(STAGES && STAGES.length){
+      // scored sleep: faint full-height band over the whole span + a stage ribbon at the bottom
+      const s0=x.getPixelForValue(STAGES[0].from), s1=x.getPixelForValue(STAGES[STAGES.length-1].to);
+      ctx.fillStyle="rgba(123,136,191,.10)";
+      ctx.fillRect(s0,a.top,s1-s0,a.bottom-a.top);
+      ctx.fillStyle="rgba(80,92,150,.9)";ctx.font="600 11px -apple-system,sans-serif";ctx.textAlign="center";
+      ctx.fillText("sleep (scored)",(s0+s1)/2,a.top+14);
+      const col={deep:"#2c3e70",light:"#9aa4d4",rem:"#59b0a8",awake:"#e0b774"};
+      const h=15, yb=a.bottom-h;
+      STAGES.forEach(s=>{
+        const x1=x.getPixelForValue(s.from), x2=x.getPixelForValue(s.to);
+        ctx.fillStyle=col[s.stage]||"#ccc";
+        ctx.fillRect(x1,yb,x2-x1,h);
+      });
+      ctx.strokeStyle="rgba(0,0,0,.18)";ctx.lineWidth=1;ctx.strokeRect(s0,yb,s1-s0,h);
+    } else if(REST){
+      const x1=x.getPixelForValue(REST.from), x2=x.getPixelForValue(REST.to);
+      ctx.fillStyle="rgba(123,136,191,.13)";
+      ctx.fillRect(x1,a.top,x2-x1,a.bottom-a.top);
+      ctx.strokeStyle="rgba(123,136,191,.45)";ctx.setLineDash([4,4]);ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(x1,a.top);ctx.lineTo(x1,a.bottom);
+      ctx.moveTo(x2,a.top);ctx.lineTo(x2,a.bottom);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle="rgba(80,92,150,.9)";ctx.font="600 11px -apple-system,sans-serif";ctx.textAlign="center";
+      ctx.fillText(REST.label||"rest / unscored",(x1+x2)/2,a.top+14);
+    }
+    ctx.restore();
+  },
+  afterDatasetsDraw(c){
+    const {ctx,chartArea:a,scales:{x}}=c;
+    ctx.save();
+    // Events are NOT labelled on the plot. They ride the heart-rate line as icons
+    // (see the eventPoints datasets) and reveal their text on hover. A stacked lane
+    // of text above the chart was unreadable once a window carried more than a few.
+    // one dot per BP reading is drawn by the datasets (at systolic, right axis);
+    // here we label each with its full sys/dia reading.
+    const ys=c.scales.ySys;
+    if(ys){
+      ctx.font="600 10px -apple-system,sans-serif";
+      const bpLabel=(arr,col)=>arr.forEach(p=>{
+        const px=x.getPixelForValue(p.x), py=ys.getPixelForValue(p.sys);
+        const txt=p.sys+"/"+p.dia, w=ctx.measureText(txt).width;
+        // keep the label inside the plot when the reading sits near an edge
+        let tx=px, align="center";
+        if(px+w/2>a.right-2){ align="right"; tx=a.right-2; }
+        else if(px-w/2<a.left+2){ align="left"; tx=a.left+2; }
+        ctx.textAlign=align;
+        ctx.fillStyle=col;ctx.fillText(txt, tx, py-9);
+      });
+      bpLabel(ARM_BP, "#b5651d");
+      bpLabel(WRIST_BP, "#7d3ba8");
+    }
+    // annotated period spans (symptom spell, exertion, ...) as a bracket along the bottom
+    if(SPANS && SPANS.length){
+      SPANS.forEach(s=>{
+        const x1=x.getPixelForValue(s.from), x2=x.getPixelForValue(s.to), yb=a.bottom-7;
+        ctx.strokeStyle=s.color;ctx.lineWidth=3;ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(x1,yb);ctx.lineTo(x2,yb);
+        ctx.moveTo(x1,yb-5);ctx.lineTo(x1,yb+5);
+        ctx.moveTo(x2,yb-5);ctx.lineTo(x2,yb+5);
+        ctx.stroke();
+        ctx.fillStyle=s.color;ctx.font="600 10.5px -apple-system,sans-serif";ctx.textAlign="center";
+        ctx.fillText(s.label,(x1+x2)/2,yb-9);
+      });
+    }
+    ctx.restore();
+  }
+};
+
+// ---------- chart ----------
+new Chart(document.getElementById("chart"), {
+  type:"line",
+  data:{ datasets:[
+    {label:"Heart rate",data:HR,parsing:false,spanGaps:true,borderColor:"#d1495b",
+      backgroundColor:"#d1495b",borderWidth:2.4,pointRadius:0,pointHitRadius:0,tension:.25,yAxisID:"y"},
+    // spanGaps is a NUMBER (minutes), not true: normal stress cadence is ~3 min, so 12
+    // bridges sampling jitter but breaks the line across a movement gap instead of drawing
+    // an interpolated ramp nobody measured.
+    {label:"Stress",data:STRESS,parsing:false,spanGaps:12,borderColor:"#1f6fb2",
+      backgroundColor:"#1f6fb2",borderWidth:1.5,pointRadius:0,pointHitRadius:0,tension:.25,yAxisID:"y"},
+    {label:"BP arm/desk",data:ARM_BP.map(p=>({x:p.x,y:p.sys})),parsing:false,showLine:false,
+      pointRadius:5,pointStyle:"circle",borderColor:"#e8871e",backgroundColor:"#e8871e",yAxisID:"ySys"},
+    {label:"BP wrist/bed",data:WRIST_BP.map(p=>({x:p.x,y:p.sys})),parsing:false,showLine:false,
+      pointRadius:6,pointStyle:"triangle",borderColor:"#9b4dca",backgroundColor:"#9b4dca",yAxisID:"ySys"},
+    // Event icons sitting on the heart-rate line. Text lives in the tooltip only.
+    // High contrast is not decorative here: these sit ON a bold red 2.4px line, and a
+    // mid-gray dot at r=4.5 is genuinely invisible against it. Near-black / deep-green
+    // fills with a thick white ring read cleanly against both the line and the card.
+    {label:"Observation",data:EVT_OBS,parsing:false,showLine:false,pointRadius:7,
+      pointHoverRadius:9.5,pointHitRadius:12,pointStyle:"circle",borderColor:"#ffffff",
+      borderWidth:2.5,backgroundColor:"#14171c",yAxisID:"y"},
+    {label:"Dose",data:EVT_DOSE,parsing:false,showLine:false,pointRadius:8,
+      pointHoverRadius:10.5,pointHitRadius:12,pointStyle:"rectRot",borderColor:"#ffffff",
+      borderWidth:2.5,backgroundColor:"#0c7a41",yAxisID:"y"},
+  ]},
+  options:{
+    responsive:true, maintainAspectRatio:false, animation:false,
+    layout:{padding:{top:14,right:6}},
+    scales:{
+      x:{type:"linear",min:XMIN,max:XMAX,
+        ticks:{stepSize:30,callback:v=>fmt(v),color:"#8a8f98",font:{size:11}},
+        grid:{color:"rgba(0,0,0,.05)"}},
+      y:{position:"left",min:YBASE,max:YTOP,title:{display:true,text:"BPM / stress",color:"#8a8f98"},
+        grid:{color:"rgba(0,0,0,.05)"},ticks:{color:"#8a8f98"}},
+      ySys:{position:"right",min:60,max:140,title:{display:true,text:"systolic",color:"#8a8f98"},
+        grid:{display:false},ticks:{color:"#8a8f98"}},
+    },
+    plugins:{
+      tooltip:{
+        // Only real points answer the hover (the HR/stress lines set pointHitRadius:0),
+        // so a tooltip is always an event, a dose, or a BP reading.
+        mode:"nearest", intersect:true, displayColors:false,
+        titleFont:{size:11}, bodyFont:{size:12}, padding:8, caretSize:5,
+        callbacks:{
+          title:items=>items.length?fmt(items[0].parsed.x):"",
+          label:ctx=>{
+            const r=ctx.raw;
+            if(r&&r.label){
+              // the note, then what the two traces were doing at that minute
+              const out=[(r.type==="dose"?"◆ ":"")+r.label];
+              const h=valAt(HR,r.x,HR_GAP), st=valAt(STRESS,r.x,STRESS_GAP);
+              out.push(h===null ? "HR — no sample" : "HR "+Math.round(h));
+              out.push(st===null ? "stress — not scored" : "stress "+Math.round(st));
+              return out;
+            }
+            if(r&&r.sys!==undefined) return r.sys+"/"+r.dia;
+            return ctx.dataset.label+": "+Math.round(ctx.parsed.y);
+          }
+        }
+      },
+      legend:{display:false},
+    }
+  },
+  plugins:[overlay, eventLane, eventCrosshair]
+});
+</script>
+</body>
+</html>

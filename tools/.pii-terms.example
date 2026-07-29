@@ -1,0 +1,25 @@
+# Denylist for tools/check-public-safe.sh — one term per line, case-insensitive
+# substring match. Lines starting with # are comments.
+#
+# COPY THIS TO tools/.pii-terms AND FILL IT IN. That file is gitignored on
+# purpose: a list of someone's medications and symptoms is itself the personal
+# data we are trying to keep out of the repo, so it must never be committed.
+#
+# What belongs in it — anything that would identify one person's health picture
+# if a stranger read this repo:
+#
+#   - medication and supplement names in the user's stack
+#   - condition and symptom names, including abbreviations
+#   - the user's private vocabulary for a sensation or routine
+#   - device model names, clinician or facility names, place names
+#   - household details that recur in observations (people, pets, rooms)
+#
+# What does NOT belong in it — generic clinical vocabulary the skills legitimately
+# need: "heart rate", "stress", "sleep", "blood pressure", "symptom", "dose".
+#
+# Example shape (replace entirely):
+# <medication-name>
+# <supplement-name>
+# <condition-abbreviation>
+# <private-term-for-a-symptom>
+# <device-model>
