@@ -5,7 +5,7 @@ description: Run the onboarding intake interview for a new Minowa user — captu
 
 # Intake Interview
 
-Takes someone from an empty Minowa record to a usable one. Produces **two** artifacts: a health baseline, and the first version of their `HealthMonitoringNorms` document.
+Takes someone from an empty Minowa record to a usable one. Produces **two** artifacts on the Minowa server: a health baseline, and the first version of their `HealthMonitoringNorms` document.
 
 The second one is the point. Clinical facts can be re-entered any time; the norms are what make every later analysis worth reading, and they are the thing a person cannot hand you on request.
 

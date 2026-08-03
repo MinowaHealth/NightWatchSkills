@@ -55,6 +55,9 @@ Corollary: when the user states a norm during a session, the reflex is
 - **Never run `git` through `device_bash`.** It strands `.git/index.lock` and blocks
   the user's own commits. Write files; let the user stage and commit.
 - **Never hand-build `dist/`.** Use `tools/build-skills.sh`.
-- Live memory files (`HealthMonitoringNorms.md`, `SleepSignatureLog.md`) are gitignored
-  and must never appear in the source tree or inside an archive. The committed
-  artifacts are the `.example.md` templates.
+- **The skills hold no data — no exceptions.** Norms live on the Minowa server and are
+  fetched at runtime with `get_health_norms`. No records file, no log file, and no
+  `.example` template standing in for one may appear in the source tree or inside an
+  archive; `check-public-safe.sh` fails on the filename either way. If something needs
+  to persist and has no server call, that is a server requirement — write it up as one.
+  Never a local file, never folded into the norms document as a workaround.

@@ -1,6 +1,6 @@
 # Norms taxonomy
 
-What belongs in a `HealthMonitoringNorms` document, what does not, and how entries are written.
+What belongs in a `HealthMonitoringNorms` document on the server, what does not, and how entries are written.
 
 A norm is **a standing instruction about how to read this person's data.** It is not a health fact. "Has asthma" is a clinical record. "Wheezing on waking is baseline for this person and not an event" is a norm.
 
@@ -65,7 +65,7 @@ Always marked. The value is in flagging what to watch, and in being able to reti
 
 One line, plain, imperative where it is an instruction. Written so that someone reading it cold applies it correctly without the backstory.
 
-Every rule carries the date it entered the file, as a trailing marker:
+Every rule carries the date it entered the document, as a trailing marker:
 
 > The wrist cuff is used only when lying still, so wrist readings appear only during rest periods. *(YYYY-MM-DD)*
 

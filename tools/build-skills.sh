@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # Build dist/*.skill archives from source.
 #
-# The memory files (HealthMonitoringNorms.md, SleepSignatureLog.md) hold personal
-# health records and are gitignored. This script NEVER reads them. Where a skill
-# expects one, the committed *.example.md template is packaged under the live
-# filename, so a fresh install gets the structure and the generic norms and none
-# of anyone's records.
+# The skills hold no data. Norms and every other personal record live on the Minowa
+# server and are fetched at runtime, so an archive is source files only — no norms
+# file, no log file, and no template standing in for either. If something needs to
+# persist and has no server call, that is a server requirement, not a packaged file.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -30,23 +29,18 @@ build() {
   [ -d "$src/references" ] && cp -R "$src/references" "$stage/$skill/"
   [ -d "$src/assets" ]     && cp -R "$src/assets"     "$stage/$skill/"
 
-  # each remaining arg is "example-file:packaged-name"
-  local pair example packaged
-  for pair in "$@"; do
-    example="${pair%%:*}"; packaged="${pair##*:}"
-    cp "$src/$example" "$stage/$skill/$packaged"
-  done
-
   rm -f "$out"
   ( cd "$stage" && zip -qr "$out" "$skill" -x '*.DS_Store' )
   rm -rf "$stage"
   printf '  built %-28s %s\n' "$skill.skill" "$(unzip -l "$out" | tail -1 | awk '{print $2" files"}')"
 }
 
-echo "Building skill archives from source (templates only, no personal data)..."
-build health-episode-report  "HealthMonitoringNorms.example.md:HealthMonitoringNorms.md"
-build scored-sleep-signature "SleepSignatureLog.example.md:SleepSignatureLog.md"
+echo "Building skill archives from source (source files only, no data of any kind)..."
+build health-episode-report
+build scored-sleep-signature
 build intake-interview
+build inputs-matrix
+build pmc-literature-finder
 
 echo
 # Single source of truth for what "safe to publish" means. Same script the

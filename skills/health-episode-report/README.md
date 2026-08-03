@@ -12,8 +12,9 @@ from 2 to 5 PM," or any request to analyze/visualize a slice of Garmin/Minowa da
 
 - `SKILL.md` — workflow and the core principles (the user sets the timeframe; ±15-min chart padding;
   observations are mandatory and verbatim; two uncalibrated BP meters; keep the narrative small).
-- `HealthMonitoringNorms.md` — accumulated inference corrections. **Read before writing any narrative.**
-  Only grows. *(Personal data — see repo README.)*
+- The accumulated inference corrections are **not** a file here. They live on the Minowa server and are
+  fetched with `minowa:get_health_norms` — **read before writing any narrative**, every run. This skill
+  stores nothing on disk.
 - `assets/report_template.html` — the report template with `{{PLACEHOLDER}}` slots and the Chart.js
   overlay plugin (rest band, event-label packing, BP scatter, hypnogram ribbon).
 - `references/minowa-data.md` — exact Minowa calls and their quirks (offset HR/stress clocks, absent

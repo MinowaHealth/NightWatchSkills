@@ -24,27 +24,27 @@ SCAN_FILES=(README.md)
 
 echo "Checking public-release safety..."
 
-# ── 1. Live memory files must never sit in the source tree ────────────────────
-for f in skills/health-episode-report/HealthMonitoringNorms.md \
-         skills/scored-sleep-signature/SleepSignatureLog.md; do
-  [ -e "$f" ] && hit "live memory file present in source tree: $f"
-done
+# ── 1. No records file of any kind may sit in the source tree ─────────────────
+# The skills hold no data: norms and signatures live on the Minowa server and are
+# fetched at runtime. That makes this stricter than it used to be — the .example
+# templates are banned too, because a template under a records filename is exactly
+# what gets mistaken for the live document once it is installed.
+records=$(find "${SCAN_DIRS[@]}" \( -name 'HealthMonitoringNorms*' -o -name 'SleepSignatureLog*' \) 2>/dev/null || true)
+if [ -n "$records" ]; then
+  hit "records file in the source tree — norms and signatures belong on the server"
+  printf '%s\n' "$records" | sed 's/^/            /'
+fi
 
-# ── 2. Built archives must carry templates, not records ───────────────────────
+# ── 2. Built archives must carry no records file at all ───────────────────────
+# A .gitignore cannot see inside a zip, so archive members are inspected directly.
 # SKIP_DIST=1 is used by the pre-build gate in build-skills.sh, where dist/ is
 # about to be regenerated and a stale archive is not yet a finding.
 if [ "${SKIP_DIST:-0}" != "1" ] && compgen -G "dist/*.skill" > /dev/null; then
   for z in dist/*.skill; do
     while read -r member; do
       case "$member" in
-        */HealthMonitoringNorms.md)
-          a=$(unzip -p "$z" "$member" | wc -c)
-          b=$(wc -c < skills/health-episode-report/HealthMonitoringNorms.example.md)
-          [ "$a" -eq "$b" ] || hit "$z: $member is not the example template" ;;
-        */SleepSignatureLog.md)
-          a=$(unzip -p "$z" "$member" | wc -c)
-          b=$(wc -c < skills/scored-sleep-signature/SleepSignatureLog.example.md)
-          [ "$a" -eq "$b" ] || hit "$z: $member is not the example template" ;;
+        */HealthMonitoringNorms*|*/SleepSignatureLog*)
+          hit "$z: contains a records file ($member) — skills carry no data" ;;
       esac
     done < <(unzip -Z1 "$z")
     # and no dated record files smuggled in
@@ -56,7 +56,9 @@ fi
 # ── 3. Structural tells — no wordlist needed, safe to keep in a public repo ───
 # A calendar date inside a skill almost always means a real logged day.
 # Compute once, so what is reported and what fails the build cannot diverge.
-dated=$(grep -rnE '20[0-9]{2}-[0-9]{2}-[0-9]{2}' --exclude='*.example.md' "${SCAN_DIRS[@]}" 2>/dev/null || true)
+# No --exclude here: there are no template files left to exempt, and an exemption
+# by filename would be a hole the moment one reappeared.
+dated=$(grep -rnE '20[0-9]{2}-[0-9]{2}-[0-9]{2}' "${SCAN_DIRS[@]}" 2>/dev/null || true)
 if [ -n "$dated" ]; then
   hit "dated record (a real logged day) in a skill"
   printf '%s\n' "$dated" | head -8 | cut -c1-130 | sed 's/^/            /'

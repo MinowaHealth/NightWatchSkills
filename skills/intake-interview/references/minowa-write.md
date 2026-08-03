@@ -24,21 +24,18 @@ Nothing is structured, but the information is durable and readable by every othe
 person plainly that this is a written record rather than filled-in fields, and that the fields
 come later.
 
-## v2 — pending server work
+## Norms storage (shipped)
 
-Norms move to versioned document storage on the server. The storage model is **dated documents, not
+Norms live in versioned document storage on the server. The storage model is **dated documents, not
 database rows**: each correction writes a new dated `HealthMonitoringNorms` document, earlier versions
 remain retrievable, and the most recent one is what gets supplied for reading. Retirement is therefore
 just absence from the newest version — but see the taxonomy: retired rules are moved to a `Retired`
 section rather than dropped, so the reasoning stays legible in the current document.
 
-When that lands:
-
-- **Reading**: fetch the current dated version rather than reading a file from a skill folder. The
-  `health-episode-report` and `scored-sleep-signature` skills both need the same edit — they currently
-  read `HealthMonitoringNorms.md` off the filesystem, and `scored-sleep-signature` reaches across into
-  the other skill's folder by path. Historical versions are available when a rule's provenance is in
-  question, but the current version is the working document.
+- **Reading**: fetch the current version with `minowa:get_health_norms`. Both analysis skills do this
+  every run; neither reads a file, and no skill reaches into another skill's folder by path. Historical
+  versions are available with `list_health_norms_history` when a rule's provenance is in question, but
+  the current version is the working document.
 - **Writing**: intake creates version one and stamps it with the intake date. It does not extend an
   existing document — if one already exists, this is a re-run, and the person should be asked whether
   to build on it or start over.

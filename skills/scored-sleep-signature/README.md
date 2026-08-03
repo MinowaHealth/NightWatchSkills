@@ -2,9 +2,11 @@
 
 Reconstructs the pre-sleep **run-up** of a Garmin-**scored** night and distills its *signature* — the
 subjective state, physiological wind-down (HR/stress trajectory), inputs (food, doses, supplements), and
-timing that led into the night — then classifies the night's quality from the scored architecture and
-logs it. Over many nights, good- vs poorer-scored approaches accumulate into a comparison that shows
-which run-up features actually track outcome.
+timing that led into the night — then classifies the night's quality from the scored architecture.
+
+> **Status: partially blocked.** The per-night card works today. The accumulating comparison does not:
+> there is no MCP tool that stores a sleep signature, and this skill stores nothing locally. See
+> "Persistence" in `SKILL.md` for the server calls required.
 
 Companion to **health-episode-report**: that skill characterizes the sleep window itself; this one
 characterizes the hours **before** onset.
@@ -15,20 +17,21 @@ night," "figure out the run-up," "sleep signature," "compare the approach across
 ## Files
 
 - `SKILL.md` — workflow and core principles. **Principle 1 is scored-only:** a signature is extracted
-  and logged only for nights Garmin actually scored; unscored/inferred rest never becomes a signature
+  only for nights Garmin actually scored; unscored/inferred rest never becomes a signature
   (those stay in health-episode-report). Also encodes the known selection bias — the worst nights go
   unscored, so the scored set skews toward better nights, and "poorer-scored" ≠ blowout.
 - `references/signature-axes.md` — the five extraction axes (subjective approach state; wind-down;
-  inputs & timing; onset timing; scored quality), how to compute each, and the running note on which
-  axes have separated good from poorer nights so far.
-- `SleepSignatureLog.md` — one paragraph per scored night, bucketed by quality, plus an "emerging
-  associations" section (observed co-occurrence only, never causal). *(Personal data — see repo README.)*
+  inputs & timing; onset timing; scored quality) and how to compute each.
+
+There are no data files here, and there will not be. Norms come from `minowa:get_health_norms`;
+anything else that needs to persist is a server requirement.
 
 ## Depends on
 
 `health-episode-report` installed alongside it — it reuses that skill's Minowa fetch conventions
 (`references/minowa-data.md`), its minutes-since-midnight coordinate system and report template (for
-an optional run-up panel), and its `HealthMonitoringNorms.md`.
+an optional run-up panel). Norms are fetched from the server by both skills, not shared through the
+filesystem.
 
 ## Design note
 

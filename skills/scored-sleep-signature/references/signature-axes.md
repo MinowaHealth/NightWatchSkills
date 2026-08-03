@@ -2,7 +2,7 @@
 
 Extract every scored night along these five fixed axes. Keep each to one or two lines in the card.
 
-**Thresholds are not in this file.** What counts as a settled heart rate, a low stress band, an early lay-down, or a good night is personal, and it sharpens as nights accumulate. Fetch it at runtime with `minowa:get_health_norms` and read the accumulated signature log. Never hardcode a value here — treat anything numeric below as a placeholder shape.
+**Thresholds are not in this file.** What counts as a settled heart rate, a low stress band, an early lay-down, or a good night is personal, and it sharpens as nights accumulate. Fetch it at runtime with `minowa:get_health_norms`. Never hardcode a value here — treat anything numeric below as a placeholder shape.
 
 ## 1. Subjective approach state (verbatim)
 Quote the bedtime-adjacent note rather than paraphrasing it — the user's own wording is the signal, and short phrases distinguishing a decisive wind-down from an ambivalent one tend to recur. Build that vocabulary from their log, not from assumption.
@@ -15,7 +15,7 @@ The spine of the signature. Compute:
 - **HR level + slope**: mean HR over the last 60 min, and whether it is descending, flat, or climbing versus the 3–4 h earlier evening.
 - **Stress band**: the range stress occupies over the last 60 min. Stress is suppressed while the user is moving, so a wind-down spent on their feet will carry little or no stress data — a measurement condition, not a finding (see `health-episode-report/references/minowa-data.md`).
 
-Compare both against the bands in the norms and the log. Note evening HR spikes (moving, eating, taking a reading) separately — a good approach can still have earlier spikes as long as the **final** hour settles. What matters is the last-hour floor, not a monotonic descent.
+Compare both against the bands in the norms. Note evening HR spikes (moving, eating, taking a reading) separately — a good approach can still have earlier spikes as long as the **final** hour settles. What matters is the last-hour floor, not a monotonic descent.
 
 ## 3. Inputs & timing
 - **Last food → onset gap**, and any reaction logged against that meal.
@@ -30,16 +30,16 @@ Read straight from the scored totals — do NOT re-derive from HR:
 
 - efficiency (asleep ÷ in-bed), deep minutes, REM minutes, number of awakenings, total in-bed.
 - Label **GOOD / TYPICAL / POORER** relative to the user's own baseline, which the norms describe. Judge against that baseline, not textbook population norms. Use "poorer-scored," not "poor" — the genuinely bad nights are often unscored and therefore absent from this set (see SKILL principle 1).
-- **If the night is unscored, there is no entry.** Do not extract or log a signature from an unscored night — stop and offer a health-episode-report instead.
+- **If the night is unscored, there is no signature.** Do not extract one from an unscored night — stop and offer a health-episode-report instead.
 
 ## What separates scored nights
 
-This is the question the log exists to answer, and the answer is per-user and provisional. Record it in the log, not here.
+This is the question the comparison exists to answer, and the answer is per-user and provisional. It belongs in the user's server-side record once there is a call that stores it — never in this file.
 
 Two framing rules generalize:
 
 - **Compare scored against scored.** Setting a good scored night against an *unscored* one is misleading: nearly every axis appears to separate, because the real difference is "did they sleep at all." The honest question is what separates a **good scored** night from a **poorer scored** one.
-- **State the n.** Early in a log, a separation is co-occurrence across a handful of nights, not a cause. Say how many scored nights the claim rests on, and report axes that fail to separate as such — a null result narrows the search and belongs in the log.
+- **State the n.** A separation is co-occurrence across a handful of nights, not a cause. Say how many scored nights the claim rests on, and report axes that fail to separate as such — a null result narrows the search. With no signature store yet, that n is 1 unless the user supplies the earlier nights themselves.
 
 ## Worked example (illustrative — invented, not anyone's record)
 

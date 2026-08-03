@@ -95,7 +95,7 @@ The best route to the *do-not-infer* norms — rules about what conclusions **no
 
 Examples of what this yields: a symptom that looks like anxiety and is not; a number that always reads high on their equipment and does not mean what it appears to; a pattern that looks causal and has been checked and is not.
 
-These are the highest-value norms in the file, and they only come out if you ask for them.
+These are the highest-value norms in the document, and they only come out if you ask for them.
 
 ### 6. What's normal for you?
 
