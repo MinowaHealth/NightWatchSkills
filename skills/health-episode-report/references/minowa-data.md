@@ -43,7 +43,7 @@ Fetch everything across the **padded** window `[start − 15 min, end + 15 min]`
 ## Nutrition rollup — `minowa:get_nutrition_report`
 - Run it for the window's day whenever any food entry appears. Returns daily calorie/macro rollups, meal count, and entries flagged against the user's current dietary settings. It is the only place a dietary-setting violation surfaces — the raw food log will not show one.
 
-## Prior analyses — `minowa:list_day_reports`, `minowa:list_episode_reports`
+## Prior analyses — `minowa:list_scored_sleep_signatures`, `minowa:list_episode_reports`
 - Both take `from`/`to` and return reports whose analyzed window *overlaps* the range. Check before writing: an existing saved report over the same window is either the thing to update or the thing not to contradict. Fetch its narrative with `get_document` when one exists.
 
 ## If data hasn't synced

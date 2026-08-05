@@ -31,15 +31,16 @@ Read straight from the scored totals — do NOT re-derive from HR:
 - efficiency (asleep ÷ in-bed), deep minutes, REM minutes, number of awakenings, total in-bed.
 - Label **GOOD / TYPICAL / POORER** relative to the user's own baseline, which the norms describe. Judge against that baseline, not textbook population norms. Use "poorer-scored," not "poor" — the genuinely bad nights are often unscored and therefore absent from this set (see SKILL principle 1).
 - **If the night is unscored, there is no signature.** Do not extract one from an unscored night — stop and offer a health-episode-report instead.
+- **If the card is saved (SKILL.md Persistence),** write this axis into `narrative_text` as its own line reading exactly `Quality: GOOD`, `Quality: TYPICAL`, or `Quality: POORER` — no other wording on that line. Cross-night retrieval greps for that exact string, so a paraphrase here silently drops the night from every future comparison.
 
 ## What separates scored nights
 
-This is the question the comparison exists to answer, and the answer is per-user and provisional. It belongs in the user's server-side record once there is a call that stores it — never in this file.
+This is the question the comparison exists to answer, and the answer is per-user and provisional. It belongs in the user's server-side record — retrieved fresh each run via `list_scored_sleep_signatures` (SKILL.md step 4) — never hardcoded in this file.
 
 Two framing rules generalize:
 
 - **Compare scored against scored.** Setting a good scored night against an *unscored* one is misleading: nearly every axis appears to separate, because the real difference is "did they sleep at all." The honest question is what separates a **good scored** night from a **poorer scored** one.
-- **State the n.** A separation is co-occurrence across a handful of nights, not a cause. Say how many scored nights the claim rests on, and report axes that fail to separate as such — a null result narrows the search. With no signature store yet, that n is 1 unless the user supplies the earlier nights themselves.
+- **State the n.** A separation is co-occurrence across a handful of nights, not a cause. Say how many scored nights the claim rests on, and report axes that fail to separate as such — a null result narrows the search. The n is whatever `list_scored_sleep_signatures` actually returns for the range the user chose — 1 when nothing prior comes back (including the first time this skill's persistence is ever used), more once signatures accumulate. Never state an n you did not just retrieve.
 
 ## Worked example (illustrative — invented, not anyone's record)
 

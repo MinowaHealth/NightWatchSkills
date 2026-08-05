@@ -39,8 +39,10 @@ echo "Building skill archives from source (source files only, no data of any kin
 build health-episode-report
 build scored-sleep-signature
 build intake-interview
+build match-my-symptoms
 build inputs-matrix
 build pmc-literature-finder
+build minowa-guide
 
 echo
 # Single source of truth for what "safe to publish" means. Same script the

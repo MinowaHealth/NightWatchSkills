@@ -4,9 +4,10 @@ Reconstructs the pre-sleep **run-up** of a Garmin-**scored** night and distills 
 subjective state, physiological wind-down (HR/stress trajectory), inputs (food, doses, supplements), and
 timing that led into the night — then classifies the night's quality from the scored architecture.
 
-> **Status: partially blocked.** The per-night card works today. The accumulating comparison does not:
-> there is no MCP tool that stores a sleep signature, and this skill stores nothing locally. See
-> "Persistence" in `SKILL.md` for the server calls required.
+> **Status: live.** The per-night card and the accumulating comparison both work: `save_scored_sleep_signature`
+> persists a card on explicit user request, and `list_scored_sleep_signatures` retrieves prior nights for
+> comparison on the next run. This skill still stores nothing locally — see "Persistence" in `SKILL.md`
+> for how the three server calls map onto the skill's own concepts.
 
 Companion to **health-episode-report**: that skill characterizes the sleep window itself; this one
 characterizes the hours **before** onset.
@@ -23,8 +24,9 @@ night," "figure out the run-up," "sleep signature," "compare the approach across
 - `references/signature-axes.md` — the five extraction axes (subjective approach state; wind-down;
   inputs & timing; onset timing; scored quality) and how to compute each.
 
-There are no data files here, and there will not be. Norms come from `minowa:get_health_norms`;
-anything else that needs to persist is a server requirement.
+There are no data files here, and there will not be. Norms come from `minowa:get_health_norms`; saved
+signatures live in the user's Minowa document collection via `save_scored_sleep_signature` /
+`list_scored_sleep_signatures`, never in this repo.
 
 ## Depends on
 

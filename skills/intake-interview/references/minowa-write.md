@@ -6,8 +6,11 @@ surface is being built. Everything else in the skill is stable; only this step s
 ## Current state of the tool surface
 
 As of this writing, every Minowa tool touching profile, conditions, allergies, medications,
-observations, or vitals is **read-only**. The only write paths are `save_chat_summary`,
-`save_day_report`, `save_episode_report`, and `update_day_report_segment`.
+observations, or vitals is **read-only**. There are write paths — `save_chat_summary`,
+`save_episode_report`, `save_scored_sleep_signature`, `update_scored_sleep_signature_segment`,
+`update_health_norms`, `add_reference`, `sync_garmin_data`, `set_input_components`, `send_feedback`
+(see `minowa-guide/references/mcp-tool-reference.md` for the complete, current list) — but none of
+them write a structured clinical record.
 
 So intake cannot commit structured clinical records yet.
 

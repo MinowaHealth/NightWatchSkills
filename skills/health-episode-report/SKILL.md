@@ -21,6 +21,8 @@ Produces the single-page HTML episode report the user has refined across prior s
 
 6. **Two uncalibrated BP meters.** An upper-arm meter sits on the desk; a wrist cuff sits by the bed. They are not calibrated against each other and the wrist unit reads consistently higher — this is fine and expected, because within a sleep period the wrist series is tracked *relative* to itself for comparison against HR and stress, not as absolute clinical values. Tag every BP reading by source (arm vs wrist). Discard a reading only when it is BOTH anomalously high within that night's own set AND symptom-inconsistent (e.g. a 150+ systolic the user would have felt as a headache but logged no headache) — that pattern is a wrist-positioning/technique artifact. Do not discard readings merely for being high.
 
+7. **Mechanism and causal claims are grounded in the saved Library, not open recall.** Any sentence that explains *why* — a physiological mechanism, a drug effect, a causal link between two streams in the data — gets checked against the user's saved Library (`minowa:search_my_data`, `scope: "documents"`) before it's written, not asserted from general knowledge. Cite what's actually saved, by title, PMCID, **and its link** (`https://pmc.ncbi.nlm.nih.gov/articles/<PMCID>/`, or the `url` field if the tool call already returned one) so the claim is one click from verifiable — say plainly when the Library has nothing on point rather than filling the gap silently; label any general background used anyway as exactly that, never blended into a cited sentence. See `references/literature-grounding.md`. This does not apply to sentences reporting what was measured (HR, stress, doses, device behavior) — only to sentences explaining mechanism.
+
 ## Workflow
 
 ### 1. Establish the timeframe
@@ -37,7 +39,7 @@ Fetch across the padded window `[start − 15 min, end + 15 min]`. **All of thes
 | Vitals — BP, weight, temperature, glucose | `get_vitals_timeline` | **omit `include`** |
 | Inputs — medication, food, observation, sync, document, acquisition | `get_recent_activity` | **`kind:"all"`** |
 | Nutrition rollup — when any food entry lands in the window | `get_nutrition_report` | the window's day |
-| Prior analyses overlapping the window | `list_day_reports`, `list_episode_reports` | `from`/`to` |
+| Prior analyses overlapping the window | `list_scored_sleep_signatures`, `list_episode_reports` | `from`/`to` |
 
 Per-stream handling:
 - **HR + stress** arrive on offset clocks — treat as two separate sparse series (`parsing:false`), not paired points. **Stress is suppressed whenever the user is moving** — documented Garmin behavior, not a gap; let the stress line break there and explain it in one short caveat sentence. Ignore `respiratory_rate` entirely — the device has no respiration sensor.
@@ -60,12 +62,21 @@ A stream may not leave this step unaccounted for. If the checklist is not closed
 ### 4. Apply the norms
 Call `minowa:get_health_norms` now. Use what it returns to write known sequences plainly and to avoid re-guessing corrected inferences.
 
-### 5. Render the report
+### 5. Ground mechanism claims in the Library
+For any sentence the narrative is about to make that explains *why* — a mechanism, a drug effect, a causal link between two streams — check `minowa:search_my_data` (`scope: "documents"`) for the mechanism or topic before writing it. See `references/literature-grounding.md` for the full check, the citation format, and how to handle a gap. Sentences that only report what was measured don't need this step.
+
+### 6. Render the report
 Copy `assets/report_template.html` and fill it in. See `references/report-format.md` for the section-by-section spec and how to populate the chart data, event array, BP scatter, table, observations, and caveats. Keep the established look: single-page card, chart at top with a hypnogram ribbon when the window is scored and a rest band when it is not, events as icons in a dedicated lane below the traces with their text on hover only (never labelled on the plot), short clinical narrative in the user's own first-person voice, data table, verbatim observations, caveats block noting the uncalibrated meters, any discarded readings, and **every stream that came back empty**.
 
 Each stream that carried rows must be visible in the rendered output, not merely fetched: events on the chart, a row in the readings table, and a Source column naming which log it came from. A value that was fetched and then left out of the report is the same failure as never fetching it.
 
 Save to `/mnt/user-data/outputs/YYYY-MM-DD_Description_vN.html` and present it. On edits, bump the version number in the filename (cache-busting) so the user always opens the corrected file.
+
+### 7. Save to Minowa, only if the user asks
+`minowa:save_episode_report` persists the finished report into the document library — call it only after the user has explicitly said to keep this one, never proactively, same rule as `update_health_norms`. Two failure modes to avoid:
+
+- **Pass the literal content, not a filename.** `report_html` and `narrative_text` take the actual HTML and text — the tool does not read a path off disk. A filename string passed by mistake gets stored verbatim as the "report": the call still returns a document id, so the mistake looks like success and is easy to miss. Put the generated content itself into the call.
+- **Superseding a correction.** If the report changes after the first save — a newly logged event, an added caveat, a corrected read — pass `supersedes_document_id` (the id the earlier save returned) and increment `version`, rather than creating an unrelated second document.
 
 ## Updating the norms
 
